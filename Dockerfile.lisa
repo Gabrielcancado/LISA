@@ -1,0 +1,53 @@
+# Adicionando ROS noetic desktop image como base
+FROM osrf/ros:noetic-desktop-full
+
+# Setando usuário no container
+ARG USERNAME=lisa
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
+# Configurando o usuário para ser um non-root
+    # Evita problemas com os volumes (Pasta que são compartilhadas)
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd -s /bin/bash --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && mkdir /home/$USERNAME/.config && chown $USER_UID:$USER_GID /home/$USERNAME/.config
+
+# Setando sudo
+    # dando permissão de root a usuários não root
+RUN apt-get update \
+    && apt-get install -y sudo \
+    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME \
+    && rm -rf /var/lib/apt/lists/*
+
+    
+# Instalando Pacotes de Python
+RUN apt-get update \
+    && apt-get install -y python3 python3-pip \
+    && apt-get install -y python-numpy \
+    && rm -rf /var/lib/apt/lists/* 
+    
+RUN pip install opencv-python
+
+RUN apt-get install ros-${ROS_DISTRO}-rosserial-arduino \
+    && apt-get install ros-${ROS_DISTRO}-rosserial
+
+FROM ros:melodic
+
+# Instalação do Arduino IDE
+RUN apt-get update && apt-get install -y \
+    arduino \
+ && rm -rf /var/lib/apt/lists/*
+
+# Instalação do rosserial
+RUN apt-get update && apt-get install -y \
+    ros-melodic-rosserial-arduino \
+    ros-melodic-rosserial \
+ && rm -rf /var/lib/apt/lists/*
+
+
+# Configurando o entrypoint script e bashrc
+COPY config/entrypoint.sh /entrypoint.sh
+COPY config/bashrc /home/${USERNAME}/.bashrc
+ENTRYPOINT [ "/bin/bash", "/entrypoint.sh" ]
+CMD [ "bash" ]
