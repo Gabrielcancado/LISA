@@ -1,0 +1,20 @@
+#!/usr/bin/python3
+
+import rospy
+from estrutura.srv import controle, controleResponse
+
+def handle_service_request(req):
+    output = req.input * 2  # Exemplo de operação: multiplicar por 2
+    rospy.loginfo(f"Recebido: {req.input}, respondendo: {output}")
+    if req.input == 2:
+        rospy.loginfo("Lisa está sorrindo")
+    return controleResponse(output)
+
+def service_server():
+    rospy.init_node('service_server')
+    service = rospy.Service('controle', controle, handle_service_request)
+    rospy.loginfo("Servidor de serviço pronto para receber pedidos.")
+    rospy.spin()
+
+if __name__ == "__main__":
+    service_server()
