@@ -52,7 +52,8 @@ def main():
                         rospy.loginfo(f"Posição do usuário: {response.posicao}")
                     except rospy.ServiceException as e:
                         rospy.logerr(f"Falha ao chamar o serviço: {e}")
-                    
+                    except CvBridgeError as e:
+                        rospy.logerr(f"Erro ao converter imagem: {e}")
 
             cv2.imshow('MediaPipe Hands', frame)
             if cv2.waitKey(5) & 0xFF == 27:
