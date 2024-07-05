@@ -4,6 +4,7 @@ import rospy
 from sensor_msgs.msg import Image
 from std_srvs.srv import Trigger, TriggerRequest
 from std_msgs.msg import String, Bool
+import time
 
 class Controlador:
     def __init__(self):
@@ -36,7 +37,7 @@ class Controlador:
             
             if self.stop_counting:
                 if self.gesture_active:
-                    rospy.loginfo("Reconhecimento de gestos em andamento...")
+                    rospy.loginfo("Reconhlf.stecimento de gestos em andamento...")
                     self.state_pub.publish(True) # Booleana para ver o estado
                     try:
                         gesture_response = self.recognize_gesture()
@@ -57,7 +58,6 @@ class Controlador:
                 
                 if self.face_active:
                     rospy.loginfo("Reconhecimento de rostos em andamento...")
-                    self.state_pub.publish(True) # Booleana para ver o estado
                     try:
                         face_response = self.recognize_face()
                         if face_response.success:
@@ -72,12 +72,18 @@ class Controlador:
                         rospy.logerr("Falha ao chamar o serviço: %s", e)
                     self.rate.sleep()
                     continue
-
+                
             try:
                 response = self.get_finger_count()
                 if response.success:
                     finger_count = int(response.message)
-                    if finger_count == 2:
+                    if finger_count == 1:
+                        rospy.loginfo("Contador é 1, ativando modo amor")
+                        self.result_pub.publish("ativando o modo amor")
+                        self.stop_counting = True
+                        time.sleep(7)
+                        self.stop_counting = True
+                    elif finger_count == 2:
                         rospy.loginfo("Contador é 2, ativando serviço de gestos.")
                         self.gesture_active = True
                         self.stop_counting = True
@@ -87,6 +93,24 @@ class Controlador:
                         self.face_active = True
                         self.stop_counting = True
                         rospy.set_param('/stop_counting', True)
+                    elif finger_count == 4:
+                        rospy.loginfo("Contador é 4, ativando modo festa.")
+                        self.result_pub.publish("ativando o modo festa")
+                        self.stop_counting = True
+                        time.sleep(7)
+                        self.stop_counting = True
+                    elif finger_count == 5:
+                        rospy.loginfo("Contador é 5, ativando modo educativo.")
+                        self.result_pub.publish("ativando o modo educativo")
+                        self.stop_counting = True
+                        time.sleep(7)
+                        self.stop_counting = True
+                    elif finger_count == 10:
+                        rospy.loginfo("Contador é 10, ativando modo susto.")
+                        self.result_pub.publish("ativando o modo susto")
+                        self.stop_counting = True
+                        time.sleep(7)
+                        self.stop_counting = True
                     else:
                         self.result_pub.publish(f"Numero de dedos: {finger_count}")
                 else:
