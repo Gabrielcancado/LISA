@@ -148,6 +148,8 @@ def sleep_timer():
         current_time = time.time()
         if current_time - last_gif_time > sleep_timeout and not is_sleeping:
             rospy.loginfo("Tempo de inatividade excedido. Exibindo animated_sleepy.gif.")
+            play_gif('animated_sleepy1.gif')
+            time.sleep(10)
             play_gif(sleep_gif_name)
             is_sleeping = True  # Indica que o modo sleepy foi ativado
         time.sleep(1)  # Verifica a cada segundo
