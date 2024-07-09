@@ -19,7 +19,7 @@ last_educativo = 1
 last_gif_time = time.time()
 sleep_timeout = 300  # 5 minutos em segundos
 sleep_gif_name = 'animated_sleepy.gif'
-is_sleeping = False  # Novo estado para verificar se está no modo sleepy
+is_sleeping = False  # Novo estado para verificar se está no modo sleep
 
 def play_gif(gif_name):
     global current_process, current_gif, last_gif_time
@@ -77,16 +77,22 @@ def modo_amor():
 def modo_festa():
     rospy.loginfo("Modo Festa Ativado!")
     play_gif('animated_party.gif')
-    time.sleep(5)
+    time.sleep(4)
     play_gif('animated_dizzy.gif')
-    time.sleep(2)
+    time.sleep(3)
+    play_gif('animated_standard.gif')
+
+def modo_raiva():
+    rospy.loginfo("Modo Raiva Ativado!")
+    play_gif('animated_angry.gif')
+    time.sleep(10)
     play_gif('animated_standard.gif')
 
 def modo_educativo():
     global educativo, last_educativo
     rospy.loginfo("Modo Educativo Ativado!")
     play_gif(f'LISA - MODO EDUCATIVO.gif')
-    time.sleep(3)
+    time.sleep(5)
     play_gif(f'animated_educativo_{educativo}.gif')
     if educativo == 1:
         time.sleep(28)
@@ -112,6 +118,8 @@ def resultados_callback(data):
         modo_educativo()
     elif "ativando o modo susto" in data.data:
         modo_susto()
+    elif "ativando o modo raiva" in data.data:
+        modo_raiva()  
     else:
         gesture_mapping = {
             'Thumb_Up': 'grooving', # feliz
@@ -122,13 +130,13 @@ def resultados_callback(data):
             'Open_Palm': 'bombastic', # The rock
         }
 
-        match = re.search(r'Gesto reconhecido: Gesto (\w+) reconhecido 3 vezes seguidas', data.data)
+        match = re.search(r'Gesto reconhecido: Gesto (\w+) reconhecido 5 vezes seguidas', data.data)
         if match:
             gesture_name = match.group(1)
             if gesture_name in gesture_mapping:
                 rospy.loginfo(f"Gesto reconhecido: {gesture_name}. Exibindo animated_{gesture_mapping[gesture_name]}.gif.")
                 play_gif(f'animated_{gesture_mapping[gesture_name]}.gif')
-                time.sleep(5)
+                time.sleep(10)
             else:
                 rospy.logwarn(f"Gesto '{gesture_name}' não encontrado no mapeamento.")
         else:
